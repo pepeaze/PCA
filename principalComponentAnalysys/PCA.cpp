@@ -34,10 +34,20 @@ struct vertices{
 	float pZ;
 };
 
-vertices vert;
-vector<vertices> v;
+struct faces{
 
-void parseOBJ(string arq){
+	float pX;
+	float pY;
+	float pZ;
+};
+
+vertices vert;
+faces fac;
+
+vector<vertices> v;
+vector<faces> f;
+
+void parseOBJ(string arq, int preencheF){
 
 	FILE * file = fopen(arq.c_str(), "r");
 	if( file == NULL ){
@@ -55,6 +65,15 @@ void parseOBJ(string arq){
 		if ( strcmp( lineHeader, "v" ) == 0 ){
 			fscanf(file, "%f %f %f\n", &vert.pX, &vert.pY, &vert.pZ);
 			v.push_back(vert);
+		}
+
+		if (preencheF == 1){
+		
+			if ( strcmp( lineHeader, "f" ) == 0 ){
+				fscanf(file, "%f %f %f\n", &fac.pX, &fac.pY, &fac.pZ);
+				f.push_back(fac);
+			}
+		
 		}
 
 	}
@@ -105,7 +124,7 @@ void preencheListV(int linhas, int colunas, MatrixXf &listV, string nomeFolder){
 			ss << p;
 			nomeArquivo = ss.str();
 			nomeArquivoWQ = nomeArquivo.substr(1,(nomeArquivo.size()-2)); //acerto a string com o nome do arquivo. A mesma retorna da biblioteca boost com ""
-			parseOBJ(nomeArquivoWQ); //faço o parse do arquivo obj e preencho o vetor de vertices do arquivo atual no loop
+			parseOBJ(nomeArquivoWQ, 0); //faço o parse do arquivo obj e preencho o vetor de vertices do arquivo atual no loop
 			
 			//preencho listV na linha "file" com os valores do vetor de vertices
 			for(int j=0; j<(colunas/3); j++){
@@ -177,11 +196,12 @@ JacobiSVD<MatrixXf> calcSVD(MatrixXf models){
 
 int main(){
 
-	string nomeFolder = "D:\\MestradoUFES\\projetoMestrado\\FacesMorfologicas\\male10K_1";
+	string nomeFolder = "D:\\MestradoUFES\\projetoMestrado\\FacesMorfologicas\\testFolder";
 	string nomePrimArq, nomePrimArqWQ; //preciso do nome do primeiro arquivo para descobrir o tamanho de  linhas "v" e alocar na matriz listV como colunas
+
 	int numTotalArquivos; //numero total de linhas da matriz listV
-	//float **listV;//matriz dos vertices/arquivo
 	int linhas, colunas;
+	int preencheF = 1;
 	MatrixXf listV(1,1);
 	MatrixXf models(1,1);
 	MatrixXf avg(1,1);
@@ -190,7 +210,7 @@ int main(){
 	getFolderInf(nomeFolder, nomePrimArq, numTotalArquivos); //pego as informacoes iniciais para alocar listV
 	//cout<<nomePrimArq<<"  "<<numTotalArquivos<<endl;
 	nomePrimArqWQ = nomePrimArq.substr(1,(nomePrimArq.size()-2)); //acerto a string com o nome do arquivo. A mesma retorna da biblioteca boost com ""
-	parseOBJ(nomePrimArqWQ); //faço o parse do arquivo obj e preencho o vetor de vertices do primeiro arquivo
+	parseOBJ(nomePrimArqWQ, preencheF); //faço o parse do arquivo obj, preenchendo o vetor de vertices do primeiro arquivo e o vetor de faces uma unica vez pois o mesmo se repete em todos os arquivos
 	linhas = numTotalArquivos;
 	colunas = (v.size()*3);
 	listV.resize(linhas,colunas);
