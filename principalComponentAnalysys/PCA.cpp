@@ -37,30 +37,6 @@ struct vertices{
 vertices vert;
 vector<vertices> v;
 
-float **cria_matriz(int linhas, int colunas){
-
-    float **matriz;
-    int i, j;
-
-    matriz = (float**)malloc(linhas * sizeof(float*)); //Aloca um Vetor de Ponteiros
-
-    for (i = 0; i < linhas; i++){ //Percorre as linhas do Vetor de Ponteiros
-       matriz[i] = (float*) malloc(colunas * sizeof(float)); //Aloca um Vetor de Inteiros para cada posição do Vetor de Ponteiros.
-       for (j = 0; j < colunas; j++){ //Percorre o Vetor de Inteiros atual.
-            matriz[i][j] = 0; //Inicializa com 0.
-       }
-	}
-
-
-    if (!matriz){
-        printf("Falta memoria para alocar o vetor de ponteiros");
-        exit(1);
-    }
-
-    return matriz;
-
-}
-
 void parseOBJ(string arq){
 
 	FILE * file = fopen(arq.c_str(), "r");
@@ -135,10 +111,7 @@ void preencheListV(int linhas, int colunas, MatrixXf &listV, string nomeFolder){
 			for(int j=0; j<(colunas/3); j++){
 				listV(file,j) = v[j].pX;
 				listV(file,j+v.size()) = v[j].pY;
-				listV(file,j+(v.size()*2)) = v[j].pZ;
-				/*listV[file][j] = v[j].pX;
-				listV[file][j+v.size()] = v[j].pY;
-				listV[file][j+(v.size()*2)] = v[j].pZ;*/							
+				listV(file,j+(v.size()*2)) = v[j].pZ;							
 			} 
 			
 			v.clear(); //limpo o vetor de vertices para começar uma nova iteração
