@@ -1,3 +1,10 @@
+/*COISAS OPENGL*/
+#include <Windows.h>//obrigatório incluir para usar o opengl
+#include <gl/GL.h>
+#include <gl/GLU.h>
+#include <gl/glut.h>
+/****************/
+
 #include <stdlib.h>
 #include <string>
 #include <iostream>
@@ -9,6 +16,7 @@
 #include <string.h>
 #include <algorithm>
 
+
 #include <boost/filesystem.hpp>
 #include <boost/foreach.hpp> 
 #include <boost/lambda/bind.hpp>
@@ -19,12 +27,27 @@
 					 So you should add path C:/folder1/folder2 to Additional Include Directories.*/
 #include <Eigen/SVD>
 
+
+
 using namespace std;
 namespace fs = boost::filesystem;
 //using namespace boost::filesystem;
 using namespace boost::lambda;
 using namespace Eigen;
 
+/*altura e largura da janela 
+de visualização do modelo*/
+int windowW = 640;
+int windowH = 480;
+/*************************/
+
+/*COISAS PCA*/
+int linhas, colunas;
+MatrixXf listV(1,1);
+MatrixXf models(1,1);
+MatrixXf avg(1,1);
+JacobiSVD<MatrixXf> svd;
+/************/
 clock_t inicio, fim;
 
 struct vertices{
@@ -46,6 +69,17 @@ faces fac;
 
 vector<vertices> v;
 vector<faces> f;
+
+void salvaAVG(MatrixXf avg){
+
+	ofstream arq;
+	arq.open("avg.txt");
+	for(int i =0; i<avg.rows();i++){
+		arq<<avg(i,0)<<endl;
+	}
+	arq.close();
+
+}
 
 void parseOBJ(string arq, int preencheF){
 
@@ -194,19 +228,12 @@ JacobiSVD<MatrixXf> calcSVD(MatrixXf models){
 	return svd;
 }
 
-int main(){
+void PCA(){
 
 	string nomeFolder = "D:\\MestradoUFES\\projetoMestrado\\FacesMorfologicas\\testFolder";
 	string nomePrimArq, nomePrimArqWQ; //preciso do nome do primeiro arquivo para descobrir o tamanho de  linhas "v" e alocar na matriz listV como colunas
-
 	int numTotalArquivos; //numero total de linhas da matriz listV
-	int linhas, colunas;
 	int preencheF = 1;
-	MatrixXf listV(1,1);
-	MatrixXf models(1,1);
-	MatrixXf avg(1,1);
-	JacobiSVD<MatrixXf> svd;
-
 	getFolderInf(nomeFolder, nomePrimArq, numTotalArquivos); //pego as informacoes iniciais para alocar listV
 	//cout<<nomePrimArq<<"  "<<numTotalArquivos<<endl;
 	nomePrimArqWQ = nomePrimArq.substr(1,(nomePrimArq.size()-2)); //acerto a string com o nome do arquivo. A mesma retorna da biblioteca boost com ""
@@ -222,11 +249,20 @@ int main(){
 	models = listV.transpose();
 	//cout<<models(0,0)<<endl;
 	calcMedia(linhas,colunas, models, avg); //calcula modelo médio
+	//salvaAVG(avg);
 	subtraiDimensaoMedia(linhas, colunas, models, avg);
-	//cout<<models(0,0)<<endl;
-	//calcSVD(models);
 	svd = calcSVD(models);
-	//cout<<svd.singularValues()<<endl;
+	cout<<svd.singularValues()<<endl;
+
+}
+
+int main(int argc, char *argv[]){
+
+	PCA();
+
+	glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGB);
+	glutInitWindowSize(windowW, windowH);
 
 	cin.get();
 }
